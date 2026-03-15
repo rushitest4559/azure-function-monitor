@@ -2,6 +2,8 @@ name: Deploy Python Function App
 
 on:
   push:
+    paths:
+        - 'app/**'
     branches: [ "main" ]
   workflow_dispatch:
 
