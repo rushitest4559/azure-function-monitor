@@ -8,7 +8,7 @@ def discount(req: func.HttpRequest) -> func.HttpResponse:
     if amount <= 0:
         return func.HttpResponse("Invalid amount", status_code=400)
     
-    discount_rate = 0.10  # 10% off
+    discount_rate = 0.20  # 20% off
     discount_amount = amount * discount_rate
     final_price = amount - discount_amount
     
