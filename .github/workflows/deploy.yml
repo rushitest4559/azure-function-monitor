@@ -12,7 +12,7 @@ permissions:
   contents: read
 
 env:
-  AZURE_FUNCTIONAPP_NAME: 'func-app-pima5k' 
+  AZURE_FUNCTIONAPP_NAME: 'func-app-co5fpy' 
   PYTHON_VERSION: '3.9'
 
 jobs:
