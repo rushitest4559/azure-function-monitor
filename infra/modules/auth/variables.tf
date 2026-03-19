@@ -5,7 +5,7 @@ variable "github_org" {
 
 variable "github_repo" {
   type = string
-  default = "azure-functions-cicd"
+  default = "azure-function-monitor"
 }
 
 variable "github_branch" {
