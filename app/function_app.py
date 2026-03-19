@@ -83,7 +83,6 @@ def discount(req: func.HttpRequest) -> func.HttpResponse:
         logger.exception("Unexpected error in discount function")
         return func.HttpResponse("Internal Server Error", status_code=500)
 
-
 # Health check endpoint for availability tests
 @app.route(route="health", auth_level=func.AuthLevel.ANONYMOUS)
 def health(req: func.HttpRequest) -> func.HttpResponse:
