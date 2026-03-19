@@ -34,7 +34,7 @@ resource "azurerm_linux_function_app" "python_func" {
 
   site_config {
     application_stack {
-      python_version = "3.9"
+      python_version = "3.12"
     }
   }
 
