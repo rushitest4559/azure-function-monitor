@@ -4,6 +4,7 @@ resource "random_string" "suffix" {
   upper   = false
 }
 
+# Storage for Function
 resource "azurerm_storage_account" "func_storage" {
   name                     = "func${random_string.suffix.result}"
   resource_group_name      = var.resource_group_name
@@ -12,6 +13,7 @@ resource "azurerm_storage_account" "func_storage" {
   account_replication_type = "LRS"
 }
 
+# Service Plan
 resource "azurerm_service_plan" "func_plan" {
   name                = "func-plan-${random_string.suffix.result}"
   resource_group_name = var.resource_group_name
@@ -20,13 +22,7 @@ resource "azurerm_service_plan" "func_plan" {
   sku_name            = "Y1"
 }
 
-resource "azurerm_application_insights" "insights" {
-  name                = "func-insights-${random_string.suffix.result}"
-  location            = var.location
-  resource_group_name = var.resource_group_name
-  application_type    = "web"
-}
-
+# Function App
 resource "azurerm_linux_function_app" "python_func" {
   name                = "func-app-${random_string.suffix.result}"
   location            = var.location
@@ -43,8 +39,9 @@ resource "azurerm_linux_function_app" "python_func" {
   }
 
   app_settings = {
-    "APPINSIGHTS_INSTRUMENTATIONKEY" = azurerm_application_insights.insights.instrumentation_key
     "ENABLE_ORYX_BUILD"              = "true"
     "SCM_DO_BUILD_DURING_DEPLOYMENT" = "true"
+    "FUNCTIONS_WORKER_RUNTIME"       = "python"
+    APPLICATIONINSIGHTS_CONNECTION_STRING = var.app_insights_connection_string
   }
 }
