@@ -16,3 +16,10 @@ def discount(req: func.HttpRequest) -> func.HttpResponse:
         f"Original: ${amount:.2f}, Discount: ${discount_amount:.2f}, Final: ${final_price:.2f}",
         status_code=200
     )
+
+@app.route(route="health", auth_level=func.AuthLevel.ANONYMOUS)
+def health(req: func.HttpRequest) -> func.HttpResponse:
+    return func.HttpResponse(
+        "Healthy",
+        status_code=200
+    )
