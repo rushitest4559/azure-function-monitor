@@ -5,7 +5,6 @@ from opencensus.ext.azure.metrics_exporter import new_metrics_exporter
 from opencensus.stats import stats, measure, view, aggregation
 
 app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
-
 # ----------------------------
 # Telemetry Setup (Logs + Metrics)
 # ----------------------------
