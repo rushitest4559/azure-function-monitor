@@ -13,7 +13,7 @@ permissions:
 
 env:
   AZURE_FUNCTIONAPP_NAME: 'func-app-0nm2qu' 
-  PYTHON_VERSION: '3.9'
+  PYTHON_VERSION: '3.12'
 
 jobs:
   build-and-deploy:

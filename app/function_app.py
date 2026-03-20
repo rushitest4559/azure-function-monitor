@@ -42,6 +42,7 @@ stats.stats.view_manager.register_exporter(exporter)
 # Function Endpoints
 # ----------------------------
 
+
 @app.route(route="discount", auth_level=func.AuthLevel.ANONYMOUS)
 def discount(req: func.HttpRequest) -> func.HttpResponse:
     try:
