@@ -1,4 +1,1 @@
 azure-functions
-opentelemetry-api
-opentelemetry-sdk
-azure-monitor-opentelemetry-exporter

@@ -1,11 +1,7 @@
 import logging
 import azure.functions as func
-from applicationinsights import TelemetryClient
 
 app = func.FunctionApp()
-
-# Initialize Application Insights (uses env vars from Azure Function)
-client = TelemetryClient()
 
 @app.route(route="discount", auth_level=func.AuthLevel.ANONYMOUS)
 def discount(req: func.HttpRequest) -> func.HttpResponse:
@@ -25,7 +21,10 @@ def discount(req: func.HttpRequest) -> func.HttpResponse:
         discount_amount = amount * discount_rate
         final_price = amount - discount_amount
 
-        # Log structured data (visible in traces table)
+        # THIS CREATES customMetrics 'discount_amount' for your workbook
+        logging.info("discount_amount", extra={"discount_amount": discount_amount})
+        
+        # Keep your existing structured logging too
         logging.info(
             "Discount computed",
             extra={"custom_dimensions": {
@@ -34,9 +33,6 @@ def discount(req: func.HttpRequest) -> func.HttpResponse:
                 "final_price": final_price,
             }},
         )
-
-        # Send custom metric (visible in customMetrics table for your workbook)
-        client.track_metric(name="discount_amount", value=discount_amount)
 
         return func.HttpResponse(
             f"Original: ${amount:.2f}, Discount: ${discount_amount:.2f}, Final: ${final_price:.2f}",
