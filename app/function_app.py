@@ -1,8 +1,21 @@
 import logging
 import azure.functions as func
 
+# Use Azure Monitor OpenTelemetry (recommended for new Python Functions)
+from opentelemetry import metrics
+
 
 app = func.FunctionApp()
+
+# Set up a meter (this is lightweight; export is handled by Azure Functions hosting)
+meter = metrics.get_meter(__name__)
+
+# This metric will appear as name == "discount_amount" in KQL customMetrics
+discount_amount_counter = meter.create_counter(
+    name="discount_amount",
+    description="Discount amount applied per request",
+    unit="₹",
+)
 
 
 @app.route(route="discount", auth_level=func.AuthLevel.ANONYMOUS)
@@ -30,7 +43,7 @@ def discount(req: func.HttpRequest) -> func.HttpResponse:
         discount_amount = amount * discount_rate
         final_price = amount - discount_amount
 
-        # Log structured data (custom_dimensions will appear in App Insights)
+        # Log structured data (custom_dimensions appear in App Insights traces/requests)
         logging.info(
             "Discount computed",
             extra={
@@ -42,10 +55,8 @@ def discount(req: func.HttpRequest) -> func.HttpResponse:
             },
         )
 
-        # To see discount_amount in KQL:
-        #   traces
-        #   | where message has "Discount computed"
-        #   | extend amount_d = tostring(customDimensions.discount_amount)
+        # Emit custom metric -> visible in customMetrics by name == 'discount_amount'
+        discount_amount_counter.add(discount_amount)
 
         return func.HttpResponse(
             f"Original: ${amount:.2f}, "
