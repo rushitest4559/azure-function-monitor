@@ -1,89 +1,62 @@
 import logging
 import azure.functions as func
-
-# Use Azure Monitor OpenTelemetry (recommended for new Python Functions)
 from opentelemetry import metrics
-
+from opentelemetry.sdk.metrics import MeterProvider
+from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
+from opentelemetry.exporter.azuremonitor import AzureMonitorMetricExporter
 
 app = func.FunctionApp()
 
-# Set up a meter (this is lightweight; export is handled by Azure Functions hosting)
-meter = metrics.get_meter(__name__)
+# Configure OpenTelemetry provider + exporter
+exporter = AzureMonitorMetricExporter()
+reader = PeriodicExportingMetricReader(exporter)
+provider = MeterProvider(metric_readers=[reader])
+metrics.set_meter_provider(provider)
 
-# This metric will appear as name == "discount_amount" in KQL customMetrics
+# Now get a real meter
+meter = metrics.get_meter(__name__)
 discount_amount_counter = meter.create_counter(
-    name="discount_amount",
+    "discount_amount",
     description="Discount amount applied per request",
     unit="₹",
 )
 
-
 @app.route(route="discount", auth_level=func.AuthLevel.ANONYMOUS)
 def discount(req: func.HttpRequest) -> func.HttpResponse:
     logging.info("Discount function started.")
-
     try:
         raw_amount = req.params.get("amount")
         if not raw_amount:
-            logging.warning("Missing 'amount' parameter.")
-            return func.HttpResponse(
-                "Missing amount parameter",
-                status_code=400,
-            )
+            return func.HttpResponse("Missing amount parameter", status_code=400)
 
         amount = float(raw_amount)
         if amount <= 0:
-            logging.warning(f"Invalid amount: {amount}")
-            return func.HttpResponse(
-                "Invalid amount",
-                status_code=400,
-            )
+            return func.HttpResponse("Invalid amount", status_code=400)
 
-        discount_rate = 0.05  # 5% off
+        discount_rate = 0.05
         discount_amount = amount * discount_rate
         final_price = amount - discount_amount
 
-        # Log structured data (custom_dimensions appear in App Insights traces/requests)
         logging.info(
             "Discount computed",
-            extra={
-                "custom_dimensions": {
-                    "original_amount": amount,
-                    "discount_amount": discount_amount,
-                    "final_price": final_price,
-                }
-            },
+            extra={"custom_dimensions": {
+                "original_amount": amount,
+                "discount_amount": discount_amount,
+                "final_price": final_price,
+            }},
         )
 
-        # Emit custom metric -> visible in customMetrics by name == 'discount_amount'
+        # Emit metric
         discount_amount_counter.add(discount_amount)
 
         return func.HttpResponse(
-            f"Original: ${amount:.2f}, "
-            f"Discount: ${discount_amount:.2f}, "
-            f"Final: ${final_price:.2f}",
+            f"Original: ${amount:.2f}, Discount: ${discount_amount:.2f}, Final: ${final_price:.2f}",
             status_code=200,
         )
-
-    except ValueError as e:
-        logging.error("Invalid amount format: %s", e)
-        return func.HttpResponse(
-            "Invalid amount format",
-            status_code=400,
-        )
-
     except Exception as e:
-        logging.exception("Unexpected error in discount function: %s", e)
-        return func.HttpResponse(
-            "Internal error",
-            status_code=500,
-        )
-
+        logging.exception("Unexpected error: %s", e)
+        return func.HttpResponse("Internal error", status_code=500)
 
 @app.route(route="health", auth_level=func.AuthLevel.ANONYMOUS)
 def health(req: func.HttpRequest) -> func.HttpResponse:
-    logging.info("Health check called.")
-    return func.HttpResponse(
-        "Healthy",
-        status_code=200,
-    )
+    return func.HttpResponse("Healthy", status_code=200)
