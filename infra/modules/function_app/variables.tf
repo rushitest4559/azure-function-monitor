@@ -4,7 +4,7 @@ variable "resource_group_name" {
 }
 variable "location" {
   type    = string
-  default = "centralindia"
+  default = "westus2"
 }
 variable "app_insights_connection_string" {
   type = string
