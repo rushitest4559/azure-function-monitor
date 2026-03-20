@@ -1,25 +1,25 @@
 import logging
 import azure.functions as func
-from opentelemetry import metrics
-from opentelemetry.sdk.metrics import MeterProvider
-from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
-from azure.monitor.opentelemetry.exporter import AzureMonitorMetricExporter
+# from opentelemetry import metrics
+# from opentelemetry.sdk.metrics import MeterProvider
+# from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
+# from azure.monitor.opentelemetry.exporter import AzureMonitorMetricExporter
 
 app = func.FunctionApp()
 
 # Configure OpenTelemetry provider + Azure Monitor exporter
-exporter = AzureMonitorMetricExporter()
-reader = PeriodicExportingMetricReader(exporter)
-provider = MeterProvider(metric_readers=[reader])
-metrics.set_meter_provider(provider)
+# exporter = AzureMonitorMetricExporter()
+# reader = PeriodicExportingMetricReader(exporter)
+# provider = MeterProvider(metric_readers=[reader])
+# metrics.set_meter_provider(provider)
 
-# Create a meter and counter
-meter = metrics.get_meter(__name__)
-discount_amount_counter = meter.create_counter(
-    "discount_amount",
-    description="Discount amount applied per request",
-    unit="₹",
-)
+# # Create a meter and counter
+# meter = metrics.get_meter(__name__)
+# discount_amount_counter = meter.create_counter(
+#     "discount_amount",
+#     description="Discount amount applied per request",
+#     unit="₹",
+# )
 
 @app.route(route="discount", auth_level=func.AuthLevel.ANONYMOUS)
 def discount(req: func.HttpRequest) -> func.HttpResponse:
@@ -50,7 +50,7 @@ def discount(req: func.HttpRequest) -> func.HttpResponse:
         )
 
         # Emit metric (visible in customMetrics table)
-        discount_amount_counter.add(discount_amount, {})
+        # discount_amount_counter.add(discount_amount, {})
 
         return func.HttpResponse(
             f"Original: ${amount:.2f}, Discount: ${discount_amount:.2f}, Final: ${final_price:.2f}",
