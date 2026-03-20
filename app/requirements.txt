@@ -1,1 +1,3 @@
 azure-functions
+opentelemetry-api
+opentelemetry-sdk
